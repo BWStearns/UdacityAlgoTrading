@@ -1,7 +1,19 @@
+import time
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import requests as req
+
+#################################################################################
+# Profiling
+#################################################################################
+
+def time_call(func):
+    start = time.time()
+    func()
+    end = time.time()
+    return end - start
+
 
 
 #################################################################################
@@ -110,10 +122,22 @@ def normalize_data(df):
     return df/df.ix[0,:]
 
 #################################################################################
-# Numpy Array Work
+# Technical Analysis Functions
 #################################################################################
 
+def get_rolling_mean(df, window=20):
+    return df.rolling(20).mean()
 
+def get_rolling_std(df, window=20):
+    return df.rolling(20).std()
+
+def get_bollinger_bands(df, window=20):
+    std_df = get_rolling_std(df, window)
+    mean_df = get_rolling_mean(df, window)
+    upper_band = (mean_df + (std_df * 2))
+    lower_band = (mean_df - (std_df * 2))
+    return df.join(upper_band, rsuffix="_UBB").\
+        join(lower_band, rsuffix="_LBB")
 
 
 #################################################################################
