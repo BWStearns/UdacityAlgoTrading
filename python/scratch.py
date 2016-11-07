@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import requests as req
 
 #################################################################################
-# Profiling
+# Profiling & MISC
 #################################################################################
 
 def time_call(func):
@@ -13,6 +13,12 @@ def time_call(func):
     func()
     end = time.time()
     return end - start
+
+def _(*args):
+    """
+    An identity function for placeholder transforms.
+    """
+    return args[0] if len(args) == 1 else args
 
 
 
@@ -131,7 +137,7 @@ def get_rolling_mean(df, window=20):
 def get_rolling_std(df, window=20):
     return df.rolling(20).std()
 
-def get_bollinger_bands(df, window=20):
+def add_bollinger_bands(df, window=20):
     std_df = get_rolling_std(df, window)
     mean_df = get_rolling_mean(df, window)
     upper_band = (mean_df + (std_df * 2))
@@ -139,11 +145,30 @@ def get_bollinger_bands(df, window=20):
     return df.join(upper_band, rsuffix="_UBB").\
         join(lower_band, rsuffix="_LBB")
 
+def daily_returns(df):
+    return df.rolling(2).apply(lambda a: (a[1]/ a[0])-1).fillna(0)
 
 #################################################################################
 # PLOTTING FUNCTIONS
 #################################################################################
 
+def histogram(df, bins=100, mean=False, stds=False):
+    df.hist(bins=bins)
+    if mean or stds:
+        dfmean = df.mean()
+    if mean:
+        plt.axvline(dfmean, color='w', linestyle='dashed', linewidth=2)
+    if stds:
+        dfstd = df.std()
+        plt.axvline(dfmean + dfstd, color='r', linestyle='dashed', linewidth=2)
+        plt.axvline(dfmean - dfstd, color='r', linestyle='dashed', linewidth=2)
+    plt.show()
+    return True
+
+def scatter_plot(df, x, y, transform=_, reg=None):
+    transform(df).plot(type="scatter", x=x, y=y)
+    plt.show()
+    return plt
 
 def plot_data(df, title="Stock Prices", normalize=False):
     """
